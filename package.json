@@ -1,6 +1,6 @@
 {
   "name": "strategic-intelligence-mcp",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Strategic Intelligence MCP Server - connecting technical progress to business outcomes with systematic strategic planning",
   "main": "dist/index.js",
   "bin": {
