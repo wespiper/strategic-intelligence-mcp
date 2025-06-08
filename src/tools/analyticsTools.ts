@@ -7,6 +7,7 @@ import { ProgressCorrelationEngine } from '../intelligence/progressCorrelationEn
 import { PatternRecognitionEngine } from '../analytics/patternRecognitionEngine.js';
 import { GoalProgressAnalytics } from '../analytics/goalProgressAnalytics.js';
 import { StrategicInsightGenerator } from '../analytics/strategicInsightGenerator.js';
+import { CriticalAnalysisEngine } from '../analytics/criticalAnalysisEngine.js';
 
 export class AnalyticsTools {
   private milestoneTracker: TechnicalMilestoneTracker;
@@ -14,6 +15,7 @@ export class AnalyticsTools {
   private patternEngine: PatternRecognitionEngine;
   private goalAnalytics: GoalProgressAnalytics;
   private insightGenerator: StrategicInsightGenerator;
+  private criticalAnalysis: CriticalAnalysisEngine;
 
   constructor(private storage: StorageAdapter) {
     this.milestoneTracker = new TechnicalMilestoneTracker(storage);
@@ -21,6 +23,7 @@ export class AnalyticsTools {
     this.patternEngine = new PatternRecognitionEngine();
     this.goalAnalytics = new GoalProgressAnalytics();
     this.insightGenerator = new StrategicInsightGenerator();
+    this.criticalAnalysis = new CriticalAnalysisEngine(storage);
   }
 
   async runComprehensiveAnalysis(args: {
@@ -762,5 +765,247 @@ export class AnalyticsTools {
         .filter(p => p.type === 'opportunity')
         .map(p => p.recommendations[0])
     };
+  }
+
+  // Critical Analysis Tools - The "Skeptical Board Member"
+  async runCriticalAnalysis(args: {
+    analysisDepth?: 'surface' | 'standard' | 'deep';
+    focusAreas?: string[];
+    includeHardTruths?: boolean;
+    includeMitigationStrategies?: boolean;
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        analysisDepth = 'standard',
+        focusAreas = [],
+        includeHardTruths = true,
+        includeMitigationStrategies = true
+      } = args;
+
+      const report = await this.criticalAnalysis.runCriticalAnalysis({
+        analysisDepth,
+        focusAreas,
+        includeHardTruths,
+        includeMitigationStrategies
+      });
+
+      return {
+        success: true,
+        data: report,
+        message: `Critical analysis completed. Found ${report.weaknesses.length} weaknesses (${report.summary.criticalIssueCount} critical), ${report.blindSpots.length} blind spots, and ${report.mitigationStrategies.length} mitigation strategies.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to run critical analysis: ${error}`
+      };
+    }
+  }
+
+  async generateSkepticalReport(args: {
+    focusAreas?: string[];
+    includeHardTruths?: boolean;
+    analysisDepth?: 'surface' | 'standard' | 'deep';
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        focusAreas = [],
+        includeHardTruths = true,
+        analysisDepth = 'deep'
+      } = args;
+
+      // Run the critical analysis
+      const criticalResult = await this.runCriticalAnalysis({
+        analysisDepth,
+        focusAreas,
+        includeHardTruths,
+        includeMitigationStrategies: true
+      });
+
+      if (!criticalResult.success) {
+        return criticalResult;
+      }
+
+      const criticalData = criticalResult.data;
+      
+      // Also run comprehensive analysis for context
+      const positiveResult = await this.runComprehensiveAnalysis({
+        includePatterns: true,
+        includeTrends: true,
+        includeGoalHealth: true,
+        includeInsights: true,
+        analysisDepth: 'standard'
+      });
+
+      const skepticalReport = {
+        reportTitle: 'Skeptical Strategic Analysis',
+        subtitle: 'Unvarnished truths and critical weaknesses requiring immediate attention',
+        generatedAt: new Date().toISOString(),
+        analysisParameters: {
+          depth: analysisDepth,
+          focusAreas: focusAreas.length > 0 ? focusAreas : ['all areas'],
+          includeHardTruths
+        },
+
+        executiveSummary: {
+          overallRiskLevel: criticalData.summary.overallRiskLevel,
+          criticalIssueCount: criticalData.summary.criticalIssueCount,
+          totalWeaknessCount: criticalData.weaknesses.length,
+          blindSpotCount: criticalData.blindSpots.length,
+          topMitigationPriorities: criticalData.summary.mitigationPriority,
+          
+          // The hard truth summary
+          realityCheck: this.generateRealityCheck(criticalData, positiveResult.data)
+        },
+
+        criticalWeaknesses: {
+          byCategory: this.groupWeaknessesByCategory(criticalData.weaknesses),
+          bySeverity: this.groupWeaknessesBySeverity(criticalData.weaknesses),
+          immediateThreats: criticalData.weaknesses.filter((w: any) => w.timeframe === 'immediate'),
+          systemicIssues: criticalData.weaknesses.filter((w: any) => w.category === 'organizational' || w.category === 'strategic'),
+          detailedWeaknesses: criticalData.weaknesses
+        },
+
+        blindSpotAnalysis: {
+          totalBlindSpots: criticalData.blindSpots.length,
+          highRiskBlindSpots: criticalData.blindSpots.filter((bs: any) => 
+            bs.potentialConsequences.length >= 3
+          ),
+          detectionGaps: this.analyzeDetectionGaps(criticalData.blindSpots),
+          blindSpots: criticalData.blindSpots
+        },
+
+        hardTruths: includeHardTruths ? {
+          totalTruths: criticalData.hardTruths.length,
+          byCategory: this.groupHardTruthsByCategory(criticalData.hardTruths),
+          mostCritical: criticalData.hardTruths.slice(0, 3),
+          allTruths: criticalData.hardTruths
+        } : null,
+
+        mitigationStrategies: {
+          totalStrategies: criticalData.mitigationStrategies.length,
+          highImpactStrategies: criticalData.mitigationStrategies.filter((s: any) => s.riskReduction >= 75),
+          quickWins: criticalData.mitigationStrategies.filter((s: any) => 
+            s.cost === 'low' && s.feasibility === 'high'
+          ),
+          allStrategies: criticalData.mitigationStrategies
+        },
+
+        criticalRecommendations: {
+          immediateActions: criticalData.recommendations.filter((r: any) => r.priority === 'immediate'),
+          urgentActions: criticalData.recommendations.filter((r: any) => r.priority === 'urgent'),
+          importantActions: criticalData.recommendations.filter((r: any) => r.priority === 'important'),
+          allRecommendations: criticalData.recommendations
+        },
+
+        // Contrasting perspective
+        perspectiveContrast: positiveResult.success ? {
+          note: 'For balance, here\'s what the optimistic analysis shows',
+          opportunitiesCount: positiveResult.data?.insights?.byType?.opportunity || 0,
+          strengthsCount: positiveResult.data?.patterns?.byType?.efficiency || 0,
+          strategicScore: positiveResult.data?.strategicScore || 0,
+          comparison: this.generatePerspectiveComparison(criticalData, positiveResult.data)
+        } : null
+      };
+
+      return {
+        success: true,
+        data: skepticalReport,
+        message: `Skeptical analysis complete. Identified ${criticalData.summary.criticalIssueCount} critical issues across ${criticalData.weaknesses.length} weaknesses. ${includeHardTruths ? `${criticalData.hardTruths.length} hard truths included.` : ''}`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to generate skeptical report: ${error}`
+      };
+    }
+  }
+
+  // Helper methods for critical analysis
+  private generateRealityCheck(criticalData: any, positiveData: any): string {
+    const criticalCount = criticalData.summary.criticalIssueCount;
+    const riskLevel = criticalData.summary.overallRiskLevel;
+    
+    if (criticalCount >= 3 && riskLevel === 'critical') {
+      return 'Your project has fundamental issues that require immediate attention before pursuing any growth initiatives.';
+    } else if (criticalCount >= 2 && riskLevel === 'high') {
+      return 'While there are opportunities, significant weaknesses are undermining your strategic execution.';
+    } else if (criticalCount >= 1) {
+      return 'Progress is being made, but critical gaps need addressing to avoid future setbacks.';
+    } else {
+      return 'The foundation appears solid, though vigilance on identified weaknesses remains important.';
+    }
+  }
+
+  private groupWeaknessesByCategory(weaknesses: any[]): Record<string, any> {
+    const grouped: Record<string, any> = {};
+    weaknesses.forEach(w => {
+      if (!grouped[w.category]) {
+        grouped[w.category] = { count: 0, items: [], averageRiskScore: 0 };
+      }
+      grouped[w.category].count++;
+      grouped[w.category].items.push(w);
+    });
+
+    // Calculate average risk scores
+    Object.keys(grouped).forEach(category => {
+      const items = grouped[category].items;
+      grouped[category].averageRiskScore = 
+        items.reduce((sum: number, item: any) => sum + item.riskScore, 0) / items.length;
+    });
+
+    return grouped;
+  }
+
+  private groupWeaknessesBySeverity(weaknesses: any[]): Record<string, any> {
+    const grouped: Record<string, any> = {};
+    weaknesses.forEach(w => {
+      if (!grouped[w.severity]) {
+        grouped[w.severity] = { count: 0, items: [] };
+      }
+      grouped[w.severity].count++;
+      grouped[w.severity].items.push(w);
+    });
+    return grouped;
+  }
+
+  private analyzeDetectionGaps(blindSpots: any[]): string[] {
+    const gaps: string[] = [];
+    
+    if (blindSpots.some(bs => bs.area.includes('Customer'))) {
+      gaps.push('Lack of customer feedback mechanisms');
+    }
+    
+    if (blindSpots.some(bs => bs.area.includes('Resource'))) {
+      gaps.push('No capacity planning or resource tracking');
+    }
+    
+    if (blindSpots.some(bs => bs.area.includes('Risk'))) {
+      gaps.push('Insufficient risk assessment processes');
+    }
+
+    return gaps;
+  }
+
+  private groupHardTruthsByCategory(hardTruths: any[]): Record<string, number> {
+    const grouped: Record<string, number> = {};
+    hardTruths.forEach(ht => {
+      grouped[ht.category] = (grouped[ht.category] || 0) + 1;
+    });
+    return grouped;
+  }
+
+  private generatePerspectiveComparison(criticalData: any, positiveData: any): string[] {
+    const comparisons: string[] = [];
+    
+    if (positiveData?.strategicScore > 70 && criticalData.summary.overallRiskLevel === 'high') {
+      comparisons.push('Optimistic view shows high strategic score, but critical analysis reveals execution risks');
+    }
+    
+    if (positiveData?.insights?.byType?.opportunity > 3 && criticalData.weaknesses.length > 5) {
+      comparisons.push('Many opportunities identified, but significant weaknesses may prevent capitalizing on them');
+    }
+    
+    return comparisons;
   }
 }

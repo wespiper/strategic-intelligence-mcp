@@ -95,6 +95,7 @@ Once initialized, you can use the 60+ strategic intelligence tools in Claude:
 - **Business Goals**: `create_business_goal`, `update_goal_progress`
 - **Technical Milestones**: `create_technical_milestone`, `analyze_development_business_alignment`
 - **Analytics & Forecasting**: `run_comprehensive_analysis`, `generate_scenario_forecast`
+- **Critical Analysis**: `run_critical_analysis`, `generate_skeptical_report` (The "Skeptical Board Member")
 - **Reporting**: `generate_strategic_report`, `export_report_data`
 
 ## Key Features
@@ -134,6 +135,50 @@ create_business_goal({
     "unit": "milliseconds",
     "timeframe": "90-days"
   }]
+})
+
+// Get tough-love analysis (The "Skeptical Board Member")
+generate_skeptical_report({
+  "focusAreas": ["strategic", "execution", "market"],
+  "includeHardTruths": true,
+  "analysisDepth": "deep"
+})
+```
+
+## Critical Analysis - The "Skeptical Board Member"
+
+The strategic intelligence server includes critical analysis tools that act like a skeptical board member - providing objective, tough-love analysis to identify blind spots and weaknesses:
+
+### Key Features
+- **Objective Weakness Detection**: Identifies strategic, execution, market, financial, technical, and organizational weaknesses
+- **Blind Spot Analysis**: Finds areas the team isn't discussing or considering
+- **Hard Truths**: Uncomfortable realities that teams often avoid discussing
+- **Mitigation Strategies**: Specific, actionable strategies to address identified issues
+- **Reality Check**: Contrasts optimistic analysis with critical assessment
+
+### When to Use
+- Before major strategic decisions
+- When things seem "too good to be true"
+- During quarterly reviews
+- When progress has stalled
+- Before investor or board presentations
+
+### Example Critical Analysis
+
+```javascript
+// Run focused critical analysis
+run_critical_analysis({
+  "analysisDepth": "deep",
+  "focusAreas": ["execution", "market"],
+  "includeHardTruths": true,
+  "includeMitigationStrategies": true
+})
+
+// Generate comprehensive skeptical report
+generate_skeptical_report({
+  "focusAreas": ["strategic", "financial", "organizational"],
+  "includeHardTruths": true,
+  "analysisDepth": "standard"
 })
 ```
 

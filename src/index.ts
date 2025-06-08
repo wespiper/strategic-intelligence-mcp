@@ -968,6 +968,65 @@ const TOOLS = {
     }
   },
 
+  // Critical Analysis Tools - The "Skeptical Board Member"
+  run_critical_analysis: {
+    name: 'run_critical_analysis',
+    description: 'Run critical strategic analysis to identify weaknesses, blind spots, and hard truths that need attention',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        analysisDepth: {
+          type: 'string',
+          enum: ['surface', 'standard', 'deep'],
+          description: 'Depth of critical analysis to perform'
+        },
+        focusAreas: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['strategic', 'execution', 'market', 'financial', 'technical', 'organizational']
+          },
+          description: 'Specific areas to focus critical analysis on'
+        },
+        includeHardTruths: {
+          type: 'boolean',
+          description: 'Include uncomfortable truths that teams often avoid discussing'
+        },
+        includeMitigationStrategies: {
+          type: 'boolean',
+          description: 'Generate specific strategies to address identified weaknesses'
+        }
+      }
+    }
+  },
+
+  generate_skeptical_report: {
+    name: 'generate_skeptical_report',
+    description: 'Generate comprehensive skeptical analysis report - like having a tough-love board member who tells hard truths',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        focusAreas: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['strategic', 'execution', 'market', 'financial', 'technical', 'organizational']
+          },
+          description: 'Areas to focus skeptical analysis on'
+        },
+        includeHardTruths: {
+          type: 'boolean',
+          description: 'Include section with uncomfortable truths about the project'
+        },
+        analysisDepth: {
+          type: 'string',
+          enum: ['surface', 'standard', 'deep'],
+          description: 'How deep to dig for weaknesses and issues'
+        }
+      }
+    }
+  },
+
   // Forecasting Tools
   generate_scenario_forecast: {
     name: 'generate_scenario_forecast',
@@ -1662,6 +1721,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       
       case 'generate_executive_insights_brief':
         return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.generateExecutiveInsightsBrief(args as any), null, 2) }] };
+
+      // Critical Analysis Tools - The "Skeptical Board Member"
+      case 'run_critical_analysis':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.runCriticalAnalysis(args as any), null, 2) }] };
+      
+      case 'generate_skeptical_report':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.generateSkepticalReport(args as any), null, 2) }] };
 
       // Forecasting Tools
       case 'generate_scenario_forecast':
