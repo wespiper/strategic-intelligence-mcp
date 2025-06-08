@@ -61,14 +61,21 @@ npm test    # Run tests
 
 ### Using as NPM Package
 
-```javascript
-import { StrategicIntelligenceServer } from 'strategic-intelligence-mcp';
+After installation, configure in Claude Desktop:
 
-// Initialize the server
-const server = new StrategicIntelligenceServer();
+```json
+{
+  "mcpServers": {
+    "strategic-intelligence": {
+      "command": "strategic-intelligence-mcp"
+    }
+  }
+}
+```
 
-// Start the server
-await server.run();
+Or run directly from command line:
+```bash
+strategic-intelligence-mcp
 ```
 
 ### MCP Tool Examples

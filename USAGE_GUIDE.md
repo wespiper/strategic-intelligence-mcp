@@ -29,8 +29,7 @@ Add to your Claude Desktop `claude_desktop_config.json`:
 {
   "mcpServers": {
     "strategic-intelligence": {
-      "command": "npx",
-      "args": ["strategic-intelligence-mcp"]
+      "command": "strategic-intelligence-mcp"
     }
   }
 }
