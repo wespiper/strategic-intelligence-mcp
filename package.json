@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "mcp-server",
@@ -20,6 +21,19 @@
   ],
   "author": "Strategic Intelligence Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wespiper/strategic-intelligence-mcp.git"
+  },
+  "homepage": "https://github.com/wespiper/strategic-intelligence-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/wespiper/strategic-intelligence-mcp/issues"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "USAGE_GUIDE.md"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
     "uuid": "^10.0.0",
