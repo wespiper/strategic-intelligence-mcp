@@ -34,7 +34,16 @@ The Strategic Intelligence MCP Server acts as your business intelligence partner
 
 ## Installation
 
+### NPM Package (Recommended)
+
 ```bash
+npm install strategic-intelligence-mcp
+```
+
+### From Source
+
+```bash
+git clone https://github.com/wespiper/strategic-intelligence-mcp.git
 cd strategic-intelligence-mcp
 npm install
 npm run build
@@ -49,6 +58,20 @@ npm test    # Run tests
 ```
 
 ## Usage
+
+### Using as NPM Package
+
+```javascript
+import { StrategicIntelligenceServer } from 'strategic-intelligence-mcp';
+
+// Initialize the server
+const server = new StrategicIntelligenceServer();
+
+// Start the server
+await server.run();
+```
+
+### MCP Tool Examples
 
 ### Starting a Strategic Conversation
 

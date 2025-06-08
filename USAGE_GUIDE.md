@@ -6,12 +6,37 @@ This is a standalone MCP server that provides strategic intelligence capabilitie
 
 ### 1. Installation
 
+#### NPM Package (Recommended)
 ```bash
+npm install strategic-intelligence-mcp
+```
+
+#### From Source
+```bash
+git clone https://github.com/wespiper/strategic-intelligence-mcp.git
+cd strategic-intelligence-mcp
 npm install
 npm run build
 ```
 
 ### 2. Claude Desktop Configuration
+
+#### For NPM Package Installation
+
+Add to your Claude Desktop `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "strategic-intelligence": {
+      "command": "npx",
+      "args": ["strategic-intelligence-mcp"]
+    }
+  }
+}
+```
+
+#### For Source Installation
 
 Add to your Claude Desktop `claude_desktop_config.json`:
 
