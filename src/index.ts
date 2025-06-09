@@ -53,7 +53,7 @@ const TOOLS = {
   // Project Initialization Tools
   initialize_project_context: {
     name: 'initialize_project_context',
-    description: 'Initialize the strategic intelligence system with project context from business plans, README files, or other strategic documents',
+    description: 'Initialize strategic intelligence with project context',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1002,7 +1002,7 @@ const TOOLS = {
 
   generate_skeptical_report: {
     name: 'generate_skeptical_report',
-    description: 'Generate comprehensive skeptical analysis report - like having a tough-love board member who tells hard truths',
+    description: 'Generate skeptical analysis report with hard truths',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1030,7 +1030,7 @@ const TOOLS = {
   // Enhanced Accuracy Analysis Tools
   analyze_project_context: {
     name: 'analyze_project_context',
-    description: 'Analyze project context for improved accuracy in strategic analysis - understand value proposition, industry characteristics, and strategic context',
+    description: 'Analyze project context for improved strategic accuracy',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1053,7 +1053,7 @@ const TOOLS = {
 
   validate_insight_accuracy: {
     name: 'validate_insight_accuracy',
-    description: 'Validate the accuracy and relevance of strategic insights using multi-dimensional quality scoring',
+    description: 'Validate strategic insight accuracy with quality scoring',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1076,7 +1076,7 @@ const TOOLS = {
 
   generate_contextually_accurate_insights: {
     name: 'generate_contextually_accurate_insights',
-    description: 'Generate strategic insights that are contextually accurate and relevant to the specific project characteristics',
+    description: 'Generate contextually accurate strategic insights',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1125,7 +1125,7 @@ const TOOLS = {
 
   improve_insight_accuracy: {
     name: 'improve_insight_accuracy',
-    description: 'Get specific recommendations to improve the accuracy and relevance of a particular insight',
+    description: 'Get recommendations to improve insight accuracy',
     inputSchema: {
       type: 'object',
       properties: {

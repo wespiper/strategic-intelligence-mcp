@@ -10,7 +10,8 @@
       "Bash(npm publish:*)",
       "Bash(npm version:*)",
       "Bash(git commit:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
