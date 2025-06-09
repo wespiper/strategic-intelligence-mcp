@@ -837,7 +837,7 @@ const TOOLS = {
 
   identify_strategic_opportunities: {
     name: 'identify_strategic_opportunities',
-    description: 'Identify strategic opportunities based on technical capabilities and market timing',
+    description: 'Identify strategic opportunities from technical capabilities',
     inputSchema: {
       type: 'object',
       properties: {
@@ -870,7 +870,7 @@ const TOOLS = {
   // Analytics Tools
   run_comprehensive_analysis: {
     name: 'run_comprehensive_analysis',
-    description: 'Run comprehensive strategic analysis including patterns, trends, goal health, and insights',
+    description: 'Run comprehensive strategic analysis',
     inputSchema: {
       type: 'object',
       properties: {
@@ -971,7 +971,7 @@ const TOOLS = {
   // Critical Analysis Tools - The "Skeptical Board Member"
   run_critical_analysis: {
     name: 'run_critical_analysis',
-    description: 'Run critical strategic analysis to identify weaknesses, blind spots, and hard truths that need attention',
+    description: 'Run critical analysis to identify weaknesses and blind spots',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1106,7 +1106,7 @@ const TOOLS = {
 
   generate_analysis_quality_report: {
     name: 'generate_analysis_quality_report',
-    description: 'Generate comprehensive report on analysis quality and accuracy metrics over time',
+    description: 'Generate analysis quality and accuracy metrics report',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1292,7 +1292,7 @@ const TOOLS = {
   // Strategy Review Automation Tools
   evaluate_strategy_review_triggers: {
     name: 'evaluate_strategy_review_triggers',
-    description: 'Evaluate automated strategy review triggers based on milestones, metrics, and events',
+    description: 'Evaluate automated strategy review triggers',
     inputSchema: {
       type: 'object',
       properties: {
