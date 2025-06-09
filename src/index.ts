@@ -1027,6 +1027,126 @@ const TOOLS = {
     }
   },
 
+  // Enhanced Accuracy Analysis Tools
+  analyze_project_context: {
+    name: 'analyze_project_context',
+    description: 'Analyze project context for improved accuracy in strategic analysis - understand value proposition, industry characteristics, and strategic context',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        projectName: { type: 'string', description: 'Name of the project to analyze' },
+        projectDescription: { type: 'string', description: 'Description of the project' },
+        industry: { type: 'string', description: 'Industry or sector' },
+        businessModel: { type: 'string', description: 'Business model' },
+        stage: { 
+          type: 'string', 
+          enum: ['mvp', 'early-stage', 'growth', 'mature'],
+          description: 'Current stage of the project' 
+        },
+        forceRefresh: { 
+          type: 'boolean', 
+          description: 'Force refresh of context analysis even if cached' 
+        }
+      }
+    }
+  },
+
+  validate_insight_accuracy: {
+    name: 'validate_insight_accuracy',
+    description: 'Validate the accuracy and relevance of strategic insights using multi-dimensional quality scoring',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        insights: {
+          type: 'array',
+          items: { type: 'object' },
+          description: 'Array of insights to validate'
+        },
+        insightId: { 
+          type: 'string', 
+          description: 'Specific insight ID to validate (if validating single insight)' 
+        },
+        includeRecommendations: { 
+          type: 'boolean', 
+          description: 'Include improvement recommendations' 
+        }
+      }
+    }
+  },
+
+  generate_contextually_accurate_insights: {
+    name: 'generate_contextually_accurate_insights',
+    description: 'Generate strategic insights that are contextually accurate and relevant to the specific project characteristics',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        analysisDepth: {
+          type: 'string',
+          enum: ['surface', 'standard', 'deep'],
+          description: 'Depth of analysis for insight generation'
+        },
+        focusAreas: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Specific areas to focus insight generation on'
+        },
+        includeValidation: {
+          type: 'boolean',
+          description: 'Validate insights before returning them'
+        },
+        maxInsights: {
+          type: 'number',
+          minimum: 1,
+          maximum: 50,
+          description: 'Maximum number of insights to generate'
+        }
+      }
+    }
+  },
+
+  generate_analysis_quality_report: {
+    name: 'generate_analysis_quality_report',
+    description: 'Generate comprehensive report on analysis quality and accuracy metrics over time',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        timeframe: {
+          type: 'string',
+          enum: ['7-days', '30-days', '90-days', 'all'],
+          description: 'Timeframe for quality analysis'
+        },
+        includeRecommendations: {
+          type: 'boolean',
+          description: 'Include specific recommendations for improving analysis quality'
+        }
+      }
+    }
+  },
+
+  improve_insight_accuracy: {
+    name: 'improve_insight_accuracy',
+    description: 'Get specific recommendations to improve the accuracy and relevance of a particular insight',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        insightId: { 
+          type: 'string', 
+          description: 'ID of the insight to improve' 
+        },
+        improvementType: {
+          type: 'string',
+          enum: ['relevance', 'accuracy', 'actionability', 'specificity', 'all'],
+          description: 'Type of improvement to focus on'
+        },
+        includeAlternatives: {
+          type: 'boolean',
+          description: 'Generate alternative versions of the insight'
+        }
+      },
+      required: ['insightId']
+    }
+  },
+
   // Forecasting Tools
   generate_scenario_forecast: {
     name: 'generate_scenario_forecast',
@@ -1728,6 +1848,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       
       case 'generate_skeptical_report':
         return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.generateSkepticalReport(args as any), null, 2) }] };
+
+      // Enhanced Accuracy Analysis Tools
+      case 'analyze_project_context':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.analyzeProjectContext(args as any), null, 2) }] };
+      
+      case 'validate_insight_accuracy':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.validateInsightAccuracy(args as any), null, 2) }] };
+      
+      case 'generate_contextually_accurate_insights':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.generateContextuallyAccurateInsights(args as any), null, 2) }] };
+      
+      case 'generate_analysis_quality_report':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.generateAnalysisQualityReport(args as any), null, 2) }] };
+      
+      case 'improve_insight_accuracy':
+        return { content: [{ type: 'text', text: JSON.stringify(await analyticsTools.improveInsightAccuracy(args as any), null, 2) }] };
 
       // Forecasting Tools
       case 'generate_scenario_forecast':

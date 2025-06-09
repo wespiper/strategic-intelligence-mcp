@@ -8,6 +8,8 @@ import { PatternRecognitionEngine } from '../analytics/patternRecognitionEngine.
 import { GoalProgressAnalytics } from '../analytics/goalProgressAnalytics.js';
 import { StrategicInsightGenerator } from '../analytics/strategicInsightGenerator.js';
 import { CriticalAnalysisEngine } from '../analytics/criticalAnalysisEngine.js';
+import { EnhancedContextAnalyzer } from '../analytics/enhancedContextAnalyzer.js';
+import { InsightValidationEngine } from '../analytics/insightValidationEngine.js';
 
 export class AnalyticsTools {
   private milestoneTracker: TechnicalMilestoneTracker;
@@ -16,6 +18,8 @@ export class AnalyticsTools {
   private goalAnalytics: GoalProgressAnalytics;
   private insightGenerator: StrategicInsightGenerator;
   private criticalAnalysis: CriticalAnalysisEngine;
+  private contextAnalyzer: EnhancedContextAnalyzer;
+  private validationEngine: InsightValidationEngine;
 
   constructor(private storage: StorageAdapter) {
     this.milestoneTracker = new TechnicalMilestoneTracker(storage);
@@ -24,6 +28,8 @@ export class AnalyticsTools {
     this.goalAnalytics = new GoalProgressAnalytics();
     this.insightGenerator = new StrategicInsightGenerator();
     this.criticalAnalysis = new CriticalAnalysisEngine(storage);
+    this.contextAnalyzer = new EnhancedContextAnalyzer(storage);
+    this.validationEngine = new InsightValidationEngine(storage);
   }
 
   async runComprehensiveAnalysis(args: {
@@ -1007,5 +1013,600 @@ export class AnalyticsTools {
     }
     
     return comparisons;
+  }
+
+  // Enhanced Accuracy Analysis Tools
+  async analyzeProjectContext(args: {
+    projectName?: string;
+    projectDescription?: string;
+    industry?: string;
+    businessModel?: string;
+    stage?: string;
+    forceRefresh?: boolean;
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        projectName,
+        projectDescription,
+        industry,
+        businessModel,
+        stage,
+        forceRefresh = false
+      } = args;
+
+      const projectData = {
+        name: projectName,
+        description: projectDescription,
+        industry,
+        businessModel,
+        stage
+      };
+
+      const context = await this.contextAnalyzer.analyzeProjectContext(projectData);
+
+      return {
+        success: true,
+        data: {
+          projectContext: context,
+          accuracyInsights: {
+            valuePropositionClarity: context.valueProposition.confidence,
+            contextCompleteness: this.calculateContextCompleteness(context),
+            analysisReadiness: this.assessAnalysisReadiness(context),
+            recommendedFocusAreas: context.analysisFramework.focusAreas,
+            potentialBlindSpots: context.analysisFramework.blindSpotAreas
+          },
+          recommendations: this.generateContextRecommendations(context)
+        },
+        message: `Project context analyzed. Value proposition confidence: ${context.valueProposition.confidence}%. ${context.analysisFramework.focusAreas.length} focus areas identified.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to analyze project context: ${error}`
+      };
+    }
+  }
+
+  async validateInsightAccuracy(args: {
+    insights?: any[];
+    insightId?: string;
+    includeRecommendations?: boolean;
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        insights,
+        insightId,
+        includeRecommendations = true
+      } = args;
+
+      let insightsToValidate: any[] = [];
+
+      if (insightId) {
+        // Find specific insight
+        const data = await this.storage.load();
+        const allInsights = Object.values(data.insights || {});
+        const specificInsight = allInsights.find((i: any) => i.id === insightId);
+        if (specificInsight) {
+          insightsToValidate = [specificInsight];
+        }
+      } else if (insights) {
+        insightsToValidate = insights;
+      } else {
+        // Validate all recent insights
+        const data = await this.storage.load();
+        insightsToValidate = Object.values(data.insights || {});
+      }
+
+      if (insightsToValidate.length === 0) {
+        return {
+          success: false,
+          error: 'No insights found to validate'
+        };
+      }
+
+      const validationReports = await this.validationEngine.validateMultipleInsights(insightsToValidate);
+      const accuracyMetrics = await this.validationEngine.generateAccuracyReport(insightsToValidate);
+
+      return {
+        success: true,
+        data: {
+          validationReports,
+          accuracyMetrics,
+          summary: {
+            totalInsights: accuracyMetrics.totalInsights,
+            validInsights: accuracyMetrics.validInsights,
+            accuracyRate: accuracyMetrics.accuracyRate,
+            avgQualityScore: accuracyMetrics.avgQualityScore,
+            topIssues: accuracyMetrics.commonIssues.slice(0, 3)
+          },
+          recommendations: includeRecommendations ? this.generateAccuracyRecommendations(accuracyMetrics) : undefined
+        },
+        message: `Validated ${accuracyMetrics.totalInsights} insights. Accuracy rate: ${Math.round(accuracyMetrics.accuracyRate)}%. ${accuracyMetrics.validInsights} insights passed validation.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to validate insight accuracy: ${error}`
+      };
+    }
+  }
+
+  async generateContextuallyAccurateInsights(args: {
+    analysisDepth?: 'surface' | 'standard' | 'deep';
+    focusAreas?: string[];
+    includeValidation?: boolean;
+    maxInsights?: number;
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        analysisDepth = 'standard',
+        focusAreas = [],
+        includeValidation = true,
+        maxInsights = 10
+      } = args;
+
+      // Get project context
+      const projectContext = await this.contextAnalyzer.analyzeProjectContext();
+      
+      // Load current data
+      const data = await this.storage.load();
+      
+      // Generate contextually aware insights
+      const contextualInsights = await this.contextAnalyzer.generateContextuallyAccurateInsights(
+        projectContext, 
+        data
+      );
+
+      // Validate insights if requested
+      let validatedInsights = contextualInsights;
+      if (includeValidation) {
+        const validationReports = await this.validationEngine.validateMultipleInsights(contextualInsights, projectContext);
+        validatedInsights = validationReports
+          .filter(report => report.shouldUse)
+          .map(report => ({
+            ...report.insight,
+            validationScore: report.qualityScore.overall,
+            contextAlignment: report.contextAlignment
+          }));
+      }
+
+      // Sort by relevance and limit
+      const topInsights = validatedInsights
+        .sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
+        .slice(0, maxInsights);
+
+      return {
+        success: true,
+        data: {
+          insights: topInsights,
+          projectContext,
+          generationMetrics: {
+            totalGenerated: contextualInsights.length,
+            afterValidation: validatedInsights.length,
+            avgRelevanceScore: this.calculateAverageScore(topInsights, 'relevanceScore'),
+            avgAccuracyConfidence: this.calculateAverageScore(topInsights, 'accuracyConfidence')
+          },
+          contextSummary: {
+            valuePropositionClarity: projectContext.valueProposition.confidence,
+            projectType: projectContext.intelligence.projectType,
+            focusAreas: projectContext.analysisFramework.focusAreas,
+            analysisDepth: projectContext.analysisFramework.analysisDepth
+          }
+        },
+        message: `Generated ${topInsights.length} contextually accurate insights. Avg relevance: ${Math.round(this.calculateAverageScore(topInsights, 'relevanceScore'))}%.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to generate contextually accurate insights: ${error}`
+      };
+    }
+  }
+
+  async generateAnalysisQualityReport(args: {
+    timeframe?: '7-days' | '30-days' | '90-days' | 'all';
+    includeRecommendations?: boolean;
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        timeframe = '30-days',
+        includeRecommendations = true
+      } = args;
+
+      const data = await this.storage.load();
+      const allInsights = Object.values(data.insights || {});
+      const allConversations = Object.values(data.conversations || {});
+
+      // Filter by timeframe
+      const cutoffDate = this.getTimeframeCutoff(timeframe);
+      const recentInsights = allInsights.filter((insight: any) => 
+        timeframe === 'all' || new Date(insight.timestamp) >= cutoffDate
+      );
+
+      // Validate all insights
+      const accuracyMetrics = await this.validationEngine.generateAccuracyReport(recentInsights);
+      
+      // Analyze context coverage
+      const projectContext = await this.contextAnalyzer.analyzeProjectContext();
+      const contextCoverage = this.analyzeContextCoverage(recentInsights, projectContext);
+      
+      // Generate improvement recommendations
+      const improvements = includeRecommendations ? 
+        this.generateQualityImprovements(accuracyMetrics, contextCoverage, projectContext) : [];
+
+      return {
+        success: true,
+        data: {
+          timeframe,
+          accuracyMetrics,
+          contextCoverage,
+          qualityTrends: this.analyzeQualityTrends(allInsights),
+          improvements,
+          summary: {
+            overallQuality: this.calculateOverallQuality(accuracyMetrics, contextCoverage),
+            keyStrengths: this.identifyQualityStrengths(accuracyMetrics, contextCoverage),
+            criticalGaps: this.identifyQualityCriticalGaps(accuracyMetrics, contextCoverage),
+            actionPriority: this.determineActionPriority(accuracyMetrics)
+          }
+        },
+        message: `Analysis quality report generated for ${timeframe}. Overall quality: ${this.calculateOverallQuality(accuracyMetrics, contextCoverage)}%. ${accuracyMetrics.commonIssues.length} common issues identified.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to generate analysis quality report: ${error}`
+      };
+    }
+  }
+
+  async improveInsightAccuracy(args: {
+    insightId?: string;
+    improvementType?: 'relevance' | 'accuracy' | 'actionability' | 'specificity' | 'all';
+    includeAlternatives?: boolean;
+  } = {}): Promise<ToolResponse> {
+    try {
+      const {
+        insightId,
+        improvementType = 'all',
+        includeAlternatives = true
+      } = args;
+
+      if (!insightId) {
+        return {
+          success: false,
+          error: 'Insight ID is required for improvement'
+        };
+      }
+
+      // Get the insight
+      const data = await this.storage.load();
+      const insight = Object.values(data.insights || {}).find((i: any) => i.id === insightId);
+      
+      if (!insight) {
+        return {
+          success: false,
+          error: `Insight with ID ${insightId} not found`
+        };
+      }
+
+      // Validate the insight
+      const validationReport = await this.validationEngine.validateInsight(insight);
+      
+      // Generate improvements
+      const improvements = this.generateSpecificImprovements(insight, validationReport, improvementType);
+      
+      // Generate alternatives if requested
+      const alternatives = includeAlternatives ? 
+        await this.generateAlternativeInsights(insight, validationReport) : [];
+
+      return {
+        success: true,
+        data: {
+          originalInsight: insight,
+          validationReport,
+          improvements,
+          alternatives,
+          improvementSummary: {
+            currentQuality: validationReport.qualityScore.overall,
+            primaryIssues: [...validationReport.issues.critical, ...validationReport.issues.moderate],
+            improvementPotential: this.calculateImprovementPotential(validationReport),
+            recommendedActions: validationReport.recommendations.improve.slice(0, 3)
+          }
+        },
+        message: `Improvement plan generated for insight. Current quality: ${validationReport.qualityScore.overall}%. ${improvements.length} improvements and ${alternatives.length} alternatives provided.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to improve insight accuracy: ${error}`
+      };
+    }
+  }
+
+  // Helper methods for enhanced accuracy
+  private calculateContextCompleteness(context: any): number {
+    let completeness = 0;
+    let totalFactors = 0;
+
+    // Check identity completeness
+    const identityFields = ['name', 'description', 'industry', 'businessModel', 'stage'];
+    const completedIdentity = identityFields.filter(field => context.identity[field] && context.identity[field] !== 'Unnamed Project');
+    completeness += (completedIdentity.length / identityFields.length) * 25;
+    totalFactors += 25;
+
+    // Check value proposition completeness
+    completeness += (context.valueProposition.confidence / 100) * 30;
+    totalFactors += 30;
+
+    // Check strategic context completeness
+    const strategicComplete = (context.strategicContext.keySuccessFactors.length > 0 ? 15 : 0) +
+                             (context.strategicContext.riskFactors.length > 0 ? 15 : 0) +
+                             (context.strategicContext.opportunityAreas.length > 0 ? 15 : 0);
+    completeness += strategicComplete;
+    totalFactors += 45;
+
+    return Math.round((completeness / totalFactors) * 100);
+  }
+
+  private assessAnalysisReadiness(context: any): number {
+    let readiness = 50; // Base readiness
+
+    if (context.valueProposition.confidence >= 70) readiness += 20;
+    if (context.strategicContext.keySuccessFactors.length >= 3) readiness += 15;
+    if (context.analysisFramework.focusAreas.length >= 2) readiness += 15;
+
+    return Math.min(100, readiness);
+  }
+
+  private generateContextRecommendations(context: any): string[] {
+    const recommendations: string[] = [];
+
+    if (context.valueProposition.confidence < 60) {
+      recommendations.push('Clarify value proposition through customer interviews and market validation');
+    }
+
+    if (context.strategicContext.keySuccessFactors.length < 3) {
+      recommendations.push('Identify and document key success factors for strategic focus');
+    }
+
+    if (context.analysisFramework.blindSpotAreas.length > 0) {
+      recommendations.push(`Address potential blind spots: ${context.analysisFramework.blindSpotAreas.slice(0, 2).join(', ')}`);
+    }
+
+    return recommendations;
+  }
+
+  private generateAccuracyRecommendations(metrics: any): string[] {
+    const recommendations: string[] = [];
+
+    if (metrics.accuracyRate < 70) {
+      recommendations.push('Focus on improving insight relevance and accuracy validation');
+    }
+
+    if (metrics.avgQualityScore < 65) {
+      recommendations.push('Enhance insight specificity and actionability');
+    }
+
+    metrics.improvementAreas.forEach((area: string) => {
+      recommendations.push(`Priority improvement: ${area}`);
+    });
+
+    return recommendations;
+  }
+
+  private calculateAverageScore(items: any[], scoreField: string): number {
+    if (!items.length) return 0;
+    const scores = items.map(item => item[scoreField] || 0);
+    return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+  }
+
+  private getTimeframeCutoff(timeframe: string): Date {
+    const now = new Date();
+    switch (timeframe) {
+      case '7-days':
+        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      case '30-days':
+        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      case '90-days':
+        return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      default:
+        return new Date(0); // All time
+    }
+  }
+
+  private analyzeContextCoverage(insights: any[], context: any): any {
+    let coverage = {
+      valueProposition: 0,
+      strategicContext: 0,
+      focusAreas: 0,
+      blindSpots: 0
+    };
+
+    insights.forEach((insight: any) => {
+      const content = insight.content || insight.insight || '';
+      
+      // Check value proposition coverage
+      if (this.contentCoversArea(content, context.valueProposition.coreValue)) {
+        coverage.valueProposition++;
+      }
+      
+      // Check strategic context coverage
+      context.strategicContext.keySuccessFactors.forEach((factor: string) => {
+        if (this.contentCoversArea(content, factor)) {
+          coverage.strategicContext++;
+        }
+      });
+      
+      // Check focus areas coverage
+      context.analysisFramework.focusAreas.forEach((area: string) => {
+        if (this.contentCoversArea(content, area)) {
+          coverage.focusAreas++;
+        }
+      });
+      
+      // Check blind spot coverage
+      context.analysisFramework.blindSpotAreas.forEach((area: string) => {
+        if (this.contentCoversArea(content, area)) {
+          coverage.blindSpots++;
+        }
+      });
+    });
+
+    return {
+      ...coverage,
+      totalInsights: insights.length,
+      coveragePercentage: {
+        valueProposition: Math.min(100, (coverage.valueProposition / insights.length) * 100),
+        strategicContext: Math.min(100, (coverage.strategicContext / insights.length) * 100),
+        focusAreas: Math.min(100, (coverage.focusAreas / insights.length) * 100),
+        blindSpots: Math.min(100, (coverage.blindSpots / insights.length) * 100)
+      }
+    };
+  }
+
+  private contentCoversArea(content: string, area: string): boolean {
+    if (!area) return false;
+    const contentLower = content.toLowerCase();
+    const areaLower = area.toLowerCase();
+    return contentLower.includes(areaLower) || areaLower.includes(contentLower);
+  }
+
+  private analyzeQualityTrends(allInsights: any[]): any {
+    // Simple trend analysis - could be enhanced
+    const trends = {
+      improving: false,
+      stable: true,
+      declining: false,
+      recommendation: 'Continue current approach'
+    };
+
+    if (allInsights.length < 10) {
+      trends.recommendation = 'Need more data for trend analysis';
+    }
+
+    return trends;
+  }
+
+  private generateQualityImprovements(metrics: any, coverage: any, context: any): string[] {
+    const improvements: string[] = [];
+
+    if (metrics.accuracyRate < 70) {
+      improvements.push('Implement pre-publication insight validation');
+    }
+
+    if (coverage.coveragePercentage.valueProposition < 50) {
+      improvements.push('Focus more insights on core value proposition');
+    }
+
+    if (coverage.coveragePercentage.blindSpots < 30) {
+      improvements.push('Address identified blind spot areas more systematically');
+    }
+
+    return improvements;
+  }
+
+  private calculateOverallQuality(metrics: any, coverage: any): number {
+    const qualityWeight = 0.6;
+    const coverageWeight = 0.4;
+    
+    const avgCoverage = Object.values(coverage.coveragePercentage).reduce((sum: number, val: unknown) => sum + (val as number), 0) / 4;
+    
+    return Math.round(metrics.avgQualityScore * qualityWeight + avgCoverage * coverageWeight);
+  }
+
+  private identifyQualityStrengths(metrics: any, coverage: any): string[] {
+    const strengths: string[] = [];
+
+    if (metrics.accuracyRate >= 80) {
+      strengths.push('High insight accuracy rate');
+    }
+
+    if (metrics.avgQualityScore >= 75) {
+      strengths.push('Strong overall insight quality');
+    }
+
+    if (coverage.coveragePercentage.focusAreas >= 70) {
+      strengths.push('Good coverage of focus areas');
+    }
+
+    return strengths;
+  }
+
+  private identifyQualityCriticalGaps(metrics: any, coverage: any): string[] {
+    const gaps: string[] = [];
+
+    if (metrics.accuracyRate < 60) {
+      gaps.push('Low insight accuracy requires immediate attention');
+    }
+
+    if (coverage.coveragePercentage.valueProposition < 40) {
+      gaps.push('Insufficient focus on value proposition');
+    }
+
+    if (metrics.avgQualityScore < 50) {
+      gaps.push('Overall insight quality below acceptable threshold');
+    }
+
+    return gaps;
+  }
+
+  private determineActionPriority(metrics: any): 'low' | 'medium' | 'high' | 'critical' {
+    if (metrics.accuracyRate < 50 || metrics.avgQualityScore < 40) {
+      return 'critical';
+    } else if (metrics.accuracyRate < 70 || metrics.avgQualityScore < 60) {
+      return 'high';
+    } else if (metrics.accuracyRate < 80 || metrics.avgQualityScore < 75) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  private generateSpecificImprovements(insight: any, validation: any, type: string): any[] {
+    const improvements: any[] = [];
+
+    if (type === 'all' || type === 'relevance') {
+      if (validation.qualityScore.relevance < 70) {
+        improvements.push({
+          type: 'relevance',
+          current: validation.qualityScore.relevance,
+          target: 85,
+          actions: validation.recommendations.improve.filter((r: string) => r.includes('relevant'))
+        });
+      }
+    }
+
+    if (type === 'all' || type === 'actionability') {
+      if (validation.qualityScore.actionability < 70) {
+        improvements.push({
+          type: 'actionability',
+          current: validation.qualityScore.actionability,
+          target: 80,
+          actions: ['Add specific action items', 'Include timelines and owners', 'Define success metrics']
+        });
+      }
+    }
+
+    return improvements;
+  }
+
+  private async generateAlternativeInsights(insight: any, validation: any): Promise<any[]> {
+    // Generate alternative versions of the insight
+    const alternatives: any[] = [];
+
+    if (validation.qualityScore.overall < 60) {
+      alternatives.push({
+        id: 'alt-1',
+        content: `Improved version: Focus on specific actionable recommendations for ${insight.category}`,
+        improvements: ['More specific', 'Action-oriented', 'Context-aligned']
+      });
+    }
+
+    return alternatives;
+  }
+
+  private calculateImprovementPotential(validation: any): number {
+    const currentScore = validation.qualityScore.overall;
+    const maxPossibleImprovement = 95; // Realistic maximum
+    return Math.round((maxPossibleImprovement - currentScore) * 0.7); // 70% of gap is realistic
   }
 }
